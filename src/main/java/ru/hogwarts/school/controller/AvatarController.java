@@ -1,6 +1,7 @@
 package ru.hogwarts.school.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @RestController
 public class AvatarController {
@@ -58,16 +60,50 @@ public class AvatarController {
              OutputStream os = response.getOutputStream();) {
             response.setStatus(200);
             response.setContentType(avatar.getMediaType());
-            response.setContentLength((int)avatar.getFileSize());
+            response.setContentLength((int) avatar.getFileSize());
             is.transferTo(os);
         }
     }
 
     @DeleteMapping("/deleteAvatar/{studentId}")
     public ResponseEntity<Void> deleteAvatar(@PathVariable long studentId) {
-        if (avatarService.findAvatar(studentId).getData()!=null) {
+        if (avatarService.findAvatar(studentId).getData() != null) {
             avatarService.deleteAvatar(studentId);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().build();}
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/paging")
+    public ResponseEntity<List<Avatar>> getAllPaging(@RequestParam Integer pageNumber, @RequestParam Integer size) {
+        if (pageNumber < 0 || size <= 0) {
+            return ResponseEntity.badRequest().build(); // Возвращаем 400 Bad Request в случае некорректных параметров
+        }
+        List<Avatar> avatars = avatarService.findAll(pageNumber, size);
+        if (avatars.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Возвращаем 204 No Content, если список пуст
+        }
+        return ResponseEntity.ok(avatars);
+    }
+
+    @GetMapping("/avatar-preview-paging")
+    public ResponseEntity<byte[]> getPagingPreview(@RequestParam Integer pageNumber,
+                                                   @RequestParam(defaultValue = "1") Integer size) {
+        // Проверка на отрицательные значения pageNumber и size
+        if (pageNumber < 0 || size <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        // Получение пагинированного списка аватаров
+        Page<Avatar> avatarPreviews = avatarService.findAvatarPreviews(pageNumber, size);
+        // Получение предварительного просмотра из первого элемента списка (первого элемента текущей страницы)
+        if (avatarPreviews.hasContent()) {
+            Avatar preview = avatarPreviews.getContent().get(0);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(preview.getData().length);
+            headers.setContentType(MediaType.parseMediaType(preview.getMediaType()));
+            return ResponseEntity.status(HttpStatus.OK).headers(headers).body(preview.getData());
+        } else {
+            return ResponseEntity.noContent().build();
+        }
+    }
 }
