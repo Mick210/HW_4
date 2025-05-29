@@ -1,5 +1,7 @@
 package ru.hogwarts.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -31,14 +33,15 @@ public class AvatarService {
     private final StudentService studentService;
     private final AvatarRepository avatarRepository;
 
-//    @Autowired
+    private final static Logger logger = LoggerFactory.getLogger(AvatarService.class);
+
     public AvatarService(AvatarRepository avatarRepository, StudentService studentService) {
         this.avatarRepository = avatarRepository;
         this.studentService = studentService;
     }
 
-
     public void uploadAvatar(Long studentId, MultipartFile file) throws IOException {
+        logger.info("Метод: uploadAvatar {}", studentId);
         Student student = studentService.findStudent(studentId);
         Path filePath = Path.of(avatarDir, student.getName() + "." + getExtension(Objects.requireNonNull(file.getOriginalFilename())));
         Files.createDirectories(filePath.getParent());
@@ -63,14 +66,17 @@ public class AvatarService {
 
 
     public void deleteAvatar(long studentId) {
+        logger.info("Метод: deleteAvatar {}", studentId);
         avatarRepository.deleteByStudentId(studentId);
     }
 
     public Avatar findAvatar(long studentId) {
+        logger.info("Метод: findAvatar {}", studentId);
         return avatarRepository.findByStudentId(studentId).orElse(new Avatar());
     }
 
     private byte[] generateImagePreview(Path filePath) throws IOException {
+        logger.info("Метод: generateImagePreview");
         try (InputStream is = Files.newInputStream(filePath);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -87,15 +93,18 @@ public class AvatarService {
     }
 
     private String getExtension(String filename) {
+        logger.info("Метод: getExtension");
         return filename.substring(filename.lastIndexOf(".") + 1);
     }
 
     public Page<Avatar> findAvatarPreviews(Integer pageNumber, Integer size) {
+        logger.info("Метод: findAvatarPreviews");
         PageRequest pageRequest = PageRequest.of(pageNumber - 1, size);
         return avatarRepository.findAll(pageRequest);
     }
 
     public List<Avatar> findAll(Integer pageNumber, Integer size) {
+        logger.info("Метод: findAll");
         Pageable page = PageRequest.of(pageNumber - 1, size);
         Page<Avatar> result = avatarRepository.findAll(page);
         return result.getContent();
