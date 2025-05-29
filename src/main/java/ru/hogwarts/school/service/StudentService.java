@@ -78,9 +78,29 @@ public class StudentService {
     }
 
     public List<Student> getLastFiveStudents() {
-         List<Student> getLastFiveStudents = studentRepository.getLastFiveStudents();
+        List<Student> getLastFiveStudents = studentRepository.getLastFiveStudents();
         logger.info("Метод. Посмотреть последних пятерых студентов {}", getLastFiveStudents);
         return getLastFiveStudents;
+    }
+
+    public List<String> getAllStudentNameBeginWithLetterA() {
+        logger.info("Метод для получения имен всех студентов, чье имя начинается с буквы А");
+        return studentRepository.findAll()
+                .stream()
+                .map(Student::getName)
+                .map(String::toUpperCase)
+                .filter(name -> name.startsWith("A"))
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public Double getAverageAgeAllStudentStream() {
+        logger.info("Метод, который будет возвращать средний возраст всех студентов.");
+        return studentRepository.findAll()
+                .stream()
+                .mapToDouble(Student::getAge)
+                .average()
+                .orElse(0);
     }
 
 }

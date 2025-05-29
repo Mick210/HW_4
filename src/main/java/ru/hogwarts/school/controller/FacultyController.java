@@ -72,5 +72,19 @@ public class FacultyController {
     public Collection<Faculty> colorFilteredFaculties(@PathVariable String color) {
         return facultyService.filterColor(color);
     }
+
+    @GetMapping("/longNameFaculty")
+    public String getLongNameFaculty() {
+        return facultyService.getLongNameFaculty();
+    }
+
+    @GetMapping("/getInteger_not_parallel_stream")
+    public ResponseEntity<Long> getInteger() {
+        return ResponseEntity.ok(facultyService.getInteger());
+
+    }@GetMapping("/getInteger_parallel_stream")
+    public ResponseEntity<Long> getInteger2() {
+        return ResponseEntity.ok(facultyService.getInteger_parallel_stream());
+    }
 }
 

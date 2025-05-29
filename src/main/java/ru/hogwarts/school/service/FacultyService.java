@@ -9,7 +9,10 @@ import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 public class FacultyService {
@@ -74,5 +77,39 @@ public class FacultyService {
                 .collect(Collectors.toList());
         logger.info("Метод: filterColor {}", filterColor);
         return filterColor;
+    }
+
+    public String getLongNameFaculty() {
+        String longName = facultyRepository.findAll()
+                .stream()
+                .map(Faculty::getName)
+                .max(Comparator.comparing(String::length))
+                .orElse("");
+        logger.info("Метод: getLongNameFaculty {}", longName);
+        System.out.println("longName = " + longName);
+        return longName;
+    }
+
+    public long getInteger() {
+        long startTime = System.currentTimeMillis();
+        int sum = Stream.iterate(1, a -> a + 1)
+                .limit(1_000_000)
+                .reduce(0, (a, b) -> a + b);
+        long endTime = System.currentTimeMillis();
+        long time1 = endTime - startTime;
+        logger.info("Метод без парралельных стримов {} миллисикунды", time1);
+        return time1;
+    }
+
+    public Long getInteger_parallel_stream() {
+        long startTime = System.currentTimeMillis();
+        int sum =  Stream.iterate(1, a -> a + 1)
+                .limit(1_000_000)
+                .parallel()
+                .reduce(0, (a, b) -> a + b);
+        long endTime = System.currentTimeMillis();
+        long time2 = endTime - startTime;
+        logger.info("Метод c парралельными стримами {} миллисикунды", time2);
+        return time2;
     }
 }

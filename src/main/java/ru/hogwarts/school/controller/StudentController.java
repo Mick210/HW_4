@@ -87,4 +87,14 @@ public class StudentController {
     public Collection<Student> ageFilteredStudents(@PathVariable int age) {
         return studentService.filterAge(age);
     }
+
+    @GetMapping("/nameBeginWithA")
+    public ResponseEntity<List<String>> getAllStudentNameBeginWithLetterA() {
+        return ResponseEntity.ok(studentService.getAllStudentNameBeginWithLetterA());
+    }
+
+    @GetMapping("/averageAgeAllStudentStream")
+    public Double getAverageAgeAllStudent() {
+        return studentService.getAverageAgeAllStudentStream();
+    }
 }
