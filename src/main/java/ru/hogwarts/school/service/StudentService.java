@@ -8,7 +8,9 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 @Service
@@ -103,4 +105,30 @@ public class StudentService {
                 .orElse(0);
     }
 
+    public void getStudentPrintParallel() {
+        logger.info("Метод вывод в консоль имена всех студентов в параллельном режиме");
+        List<Student> students = studentRepository.findAll()
+                .stream()
+                .limit(7)
+                .toList();
+
+        printName(students, 0);
+        printName(students, 1);
+
+        Thread thread1 = new Thread(() -> {
+            printName(students, 2);
+            printName(students, 3);
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            printName(students, 4);
+            printName(students, 5);
+        });
+        thread2.start();
+    }
+
+    private void printName(List<Student> students, int number) {
+        System.out.println(students.get(number).getName());
+    }
 }
