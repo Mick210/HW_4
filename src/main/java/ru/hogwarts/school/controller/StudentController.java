@@ -104,4 +104,9 @@ public class StudentController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/print-synchronized")
+    public ResponseEntity<Void> getStudentprintSynchronized() {
+        studentService.getStudentPrintSynchronized();
+        return ResponseEntity.ok().build();
+    }
 }

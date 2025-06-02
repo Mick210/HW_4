@@ -8,9 +8,7 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.stream.Collectors;
 
 @Service
@@ -129,6 +127,33 @@ public class StudentService {
     }
 
     private void printName(List<Student> students, int number) {
+        System.out.println(students.get(number).getName());
+    }
+
+    public void getStudentPrintSynchronized() {
+        logger.info("Метод вывод в консоль имена всех студентов в синхронном режиме");
+        List<Student> students = studentRepository.findAll()
+                .stream()
+                .limit(7)
+                .toList();
+
+        synchronizedPrintName(students, 0);
+        synchronizedPrintName(students, 1);
+
+        Thread thread1 = new Thread(() -> {
+            synchronizedPrintName(students, 2);
+            synchronizedPrintName(students, 3);
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            synchronizedPrintName(students, 4);
+            synchronizedPrintName(students, 5);
+        });
+        thread2.start();
+    }
+
+    private synchronized void synchronizedPrintName(List<Student> students, int number) {
         System.out.println(students.get(number).getName());
     }
 }
